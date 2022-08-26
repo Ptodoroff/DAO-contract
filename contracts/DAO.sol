@@ -12,7 +12,7 @@ uint public availableFunds;
 uint public contributionEnd;                                //following the closed contribution model for this DAO contract, I define a time , after which, contribution is not possible
 uint public nextProposalId;
 uint public voteTime;
-uint public quorum;                                         //specifies the amount of votes needed for the proposal to pass. Must be an uint between 0 and 100 included
+uint public quorum;                                         //specifies the amount of votes in % needed for the proposal to pass. Must be an uint between 0 and 100 included
 
 address public admin;
 
@@ -41,9 +41,11 @@ modifier onlyAdmin () {
 
 
 //constructor//
-constructor (uint contributionTime) {
+constructor (uint contributionTime,uint _voteTime, uint _quorum) payable {
     contributionEnd = block.timestamp + contributionTime; 
     admin=msg.sender;
+    quorum=_quorum;
+    voteTime=_voteTime;
 
 
 }
@@ -78,8 +80,8 @@ constructor (uint contributionTime) {
     require(block.timestamp < contributionEnd, "The contribution period is over");
     availableFunds+=msg.value;
     isInvestor[msg.sender]=true;
-    totalShares= msg.value/ 1 ether;           // I set the shares ratio as 1 share per ether deposited
-    shares[msg.sender] = msg.value/ 1 ether;
+    totalShares+= msg.value/ 1 ether;           // I set the shares ratio as 1 share per ether deposited
+    shares[msg.sender] += msg.value/ 1 ether;
  }
 
   function redeemShare (uint _amount ) external {
@@ -105,7 +107,7 @@ constructor (uint contributionTime) {
     require (proposal.isExecuted==false,"this proposal has already been executed");
     require (proposal.end  <= block.timestamp,"voting for this proposal has not ended");
     require ((proposal.votes/totalShares)*100 >=quorum, "Votes are less than the one,set by the quorum variable");                        // as quorum is an uint from 0 to 100, I calculate the the fraction of the votes from the total shares and then I multiply it by 100 to conver it into percent and compare it to the quorum variable
-    _tarnsferEther(proposal.amount, proposal.proposalAddress);
+    transferEther(proposal.amount, proposal.proposalAddress);
   }
 
   function transferEther (uint _amount, address payable _address) private {
@@ -114,7 +116,7 @@ constructor (uint contributionTime) {
     _address.transfer(_amount);
   }
 
-  function withdraw (uint _amount, address payable _to) onlyAdmin {                                                 // Altohugh a controversial function , as the admin may be corrupted, I believe it is better to have an option of transfering the funds than have them "stuck" forever in the contract, in case of a bug.
+  function withdraw (uint _amount, address payable _to) external onlyAdmin {                                                 // Altohugh a controversial function , as the admin may be corrupted, I believe it is better to have an option of transfering the funds than have them "stuck" forever in the contract, in case of a bug.
     transferEther( _amount, _to);
   }
 
