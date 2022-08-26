@@ -53,7 +53,7 @@ constructor (uint contributionTime,uint _voteTime, uint _quorum) payable {
 
  function createProposal (string memory _name,uint _amount,address payable _proposalAddress) external  onlyInvestor{
     require(isInvestor[msg.sender], "The proposer is not an investor");
-    require(availableFunds<=_amount, "Requested funding from this proposal exceeds the funds of the DAO"); 
+    require(availableFunds>=_amount, "Requested funding from this proposal exceeds the funds of the DAO"); 
     proposals[nextProposalId] = Proposal (
         nextProposalId,
         _name,
