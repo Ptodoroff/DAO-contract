@@ -12,7 +12,7 @@ uint public availableFunds;
 uint public contributionEnd;                                //following the closed contribution model for this DAO contract, I define a time , after which, contribution is not possible
 uint public nextProposalId;
 uint public voteTime;
-uint public quorum;                                         //specifies the amount of votes needed for the proposal to pass
+uint public quorum;                                         //specifies the amount of votes needed for the proposal to pass. Must be an uint between 0 and 100 included
 
 address public admin;
 
@@ -34,10 +34,17 @@ modifier onlyInvestor (){
     _;
 }
 
+modifier onlyAdmin () {
+        require(msg.sender ==admin, "You are not the admin the DAO!");
+    _;
+}
+
 
 //constructor//
 constructor (uint contributionTime) {
     contributionEnd = block.timestamp + contributionTime; 
+    admin=msg.sender;
+
 
 }
  //functions //
@@ -92,6 +99,29 @@ constructor (uint contributionTime) {
 
 
   }
+
+  function executeProposal (uint proposalId) external onlyAdmin {
+    Proposal storage proposal=proposals[proposalId];
+    require (proposal.isExecuted==false,"this proposal has already been executed");
+    require (proposal.end  <= block.timestamp,"voting for this proposal has not ended");
+    require ((proposal.votes/totalShares)*100 >=quorum, "Votes are less than the one,set by the quorum variable");                        // as quorum is an uint from 0 to 100, I calculate the the fraction of the votes from the total shares and then I multiply it by 100 to conver it into percent and compare it to the quorum variable
+    _tarnsferEther(proposal.amount, proposal.proposalAddress);
+  }
+
+  function transferEther (uint _amount, address payable _address) private {
+    require(_amount <= availableFunds, "Amount exceed the available funds in the DAO");
+    availableFunds-=_amount;
+    _address.transfer(_amount);
+  }
+
+  function withdraw (uint _amount, address payable _to) onlyAdmin {                                                 // Altohugh a controversial function , as the admin may be corrupted, I believe it is better to have an option of transfering the funds than have them "stuck" forever in the contract, in case of a bug.
+    transferEther( _amount, _to);
+  }
+
+  fallback () external payable {
+    availableFunds+=msg.value;
+  }
+
 
 
 
