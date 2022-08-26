@@ -1,11 +1,25 @@
 {
   "name": "dao",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ptodoroff/DAO-contract.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Ptodoroff/DAO-contract/issues"
+  },
+  "homepage": "https://github.com/Ptodoroff/DAO-contract#readme",
+  "description": "",
+  "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.15"
+  }
 }
