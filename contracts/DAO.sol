@@ -12,7 +12,7 @@ uint public availableFunds;
 uint public contributionEnd;                                //following the closed contribution model for this DAO contract, I define a time , after which, contribution is not possible
 uint public nextProposalId;
 uint public voteTime;
-uint public quorum;                                         //specifies the amount of votes in % needed for the proposal to pass. Must be an uint between 0 and 100 included
+uint public quorum;                                         //specifies the amount of votes needed for the proposal to pass. Must be an uint between 0 and 100 included
 
 address public admin;
 
@@ -41,7 +41,7 @@ modifier onlyAdmin () {
 
 
 //constructor//
-constructor (uint contributionTime,uint _voteTime, uint _quorum) payable {
+constructor (uint contributionTime,uint _voteTime, uint _quorum)  {
     contributionEnd = block.timestamp + contributionTime; 
     admin=msg.sender;
     quorum=_quorum;
