@@ -70,7 +70,7 @@ constructor (uint contributionTime,uint _voteTime, uint _quorum)  {
     Proposal storage proposal = proposals[proposalId];
     require (votes[msg.sender][proposalId]==false, "You have already voted for this proposal");
     require (block.timestamp < proposal.end ,"Voting for this proposal is over");
-    votes[msg.sender][proposalId]==true;
+    votes[msg.sender][proposalId]=true;
     proposal.votes += shares[msg.sender];           // I could also define it as shares[msg.sender]/totalShares but chose the former for simplicity reasons
  }
 
@@ -87,7 +87,7 @@ constructor (uint contributionTime,uint _voteTime, uint _quorum)  {
     require (shares[msg.sender]>=_amount, "Not enough shares");
     require (availableFunds >= _amount, "Not enough available funds");
     shares[msg.sender] -= _amount;
-    availableFunds-=_amount;
+    availableFunds-=_amount * 1 ether;
     payable(msg.sender).transfer(_amount * 1 ether);
 
   }
@@ -106,6 +106,7 @@ constructor (uint contributionTime,uint _voteTime, uint _quorum)  {
     require (proposal.isExecuted==false,"this proposal has already been executed");
     require (proposal.end  <= block.timestamp,"voting for this proposal has not ended");
     require ((proposal.votes/totalShares)*100 >=quorum, "Votes are less than the one,set by the quorum variable");                        // as quorum is an uint from 0 to 100, I calculate the the fraction of the votes from the total shares and then I multiply it by 100 to conver it into percent and compare it to the quorum variable
+    proposal.isExecuted=true;
     transferEther(proposal.amount, proposal.proposalAddress);
   }
 
@@ -116,6 +117,7 @@ constructor (uint contributionTime,uint _voteTime, uint _quorum)  {
   }
 
   function withdraw (uint _amount, address payable _to) external onlyAdmin {                                                 // Altohugh a controversial function , as the admin may be corrupted, I believe it is better to have an option of transfering the funds than have them "stuck" forever in the contract, in case of a bug.
+     require (availableFunds >= _amount, "Not enough available funds");
     transferEther( _amount, _to);
   }
 
